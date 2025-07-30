@@ -39,4 +39,4 @@ AutoPrint is a user-friendly Windows application that automatically prints new i
 
 ## Dependencies
 
-*   [Pillow](https://python-pillow.org/): A powerful image processing library for Python.
+*   [Pillow](https://pypi.org/project/pillow/): A powerful image processing library for Python.
