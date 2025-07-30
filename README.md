@@ -17,7 +17,7 @@ AutoPrint is a user-friendly Windows application that automatically prints new i
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/autoprint.git
+    git clone https://github.com/navvvdeep/autoprint.git
     ```
 2.  **Navigate to the project directory:**
     ```bash
@@ -40,7 +40,3 @@ AutoPrint is a user-friendly Windows application that automatically prints new i
 ## Dependencies
 
 *   [Pillow](https://python-pillow.org/): A powerful image processing library for Python.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
