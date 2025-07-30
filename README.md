@@ -29,7 +29,7 @@ AutoPrint is a user-friendly Windows application that automatically prints new i
 ## Usage
 
 1.  **Run the application:**
-    Execute the `main.py` file to launch the AutoPrint application.
+    Execute the `guiap.py` file to launch the AutoPrint application.
 2.  **Select a directory:**
     Click the "Select Directory" button to choose the folder you want to monitor. By default, the application will watch the directory where it is located.
 3.  **Start watching:**
