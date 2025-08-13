@@ -19,7 +19,7 @@ if %errorlevel% neq 0 (
 
 echo Installing required Python libraries...
 
-pip install Pillow
+pip install Pillow pystray
 
 if %errorlevel% equ 0 (
     echo Dependencies installed successfully.

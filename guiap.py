@@ -6,6 +6,8 @@ import tkinter as tk
 from tkinter import filedialog, scrolledtext
 import threading
 import sys
+import pystray
+from pystray import MenuItem as item
 
 def get_startup_folder():
     return os.path.join(os.environ['APPDATA'], 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup')
@@ -24,11 +26,24 @@ def create_shortcut(target, shortcut_path):
     subprocess.run(["cscript", vbs_path])
     os.remove(vbs_path)
 
+
 class AutoPrintGUI(tk.Tk):
+    def exit_app_direct(self):
+        self.destroy()
     def __init__(self):
         super().__init__()
         self.title("AutoPrint")
-        self.geometry("600x400")
+        self.geometry("420x260")
+        self.icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.ico")
+        try:
+            self.iconbitmap(self.icon_path)
+            self.wm_iconbitmap(self.icon_path)
+        except Exception:
+            pass
+
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.tray_icon = None
+        self.is_tray = False
 
         self.watch_thread = None
         self.watching = False
@@ -39,17 +54,23 @@ class AutoPrintGUI(tk.Tk):
 
     def create_widgets(self):
         self.main_frame = tk.Frame(self)
-        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
 
         # Top frame for controls
         self.top_frame = tk.Frame(self.main_frame)
-        self.top_frame.pack(fill=tk.X)
+        self.top_frame.pack(fill=tk.X, pady=(0, 2))
 
         self.toggle_button = tk.Button(self.top_frame, text="Start Watching", command=self.toggle_watching)
-        self.toggle_button.pack(side=tk.LEFT, padx=(0, 10))
+        self.toggle_button.pack(side=tk.LEFT, padx=(0, 4))
 
         self.select_dir_button = tk.Button(self.top_frame, text="Select Directory", command=self.select_directory)
-        self.select_dir_button.pack(side=tk.LEFT)
+        self.select_dir_button.pack(side=tk.LEFT, padx=(0, 4))
+
+        self.minimize_tray_button = tk.Button(self.top_frame, text="Minimize to Tray", command=self.minimize_to_tray)
+        self.minimize_tray_button.pack(side=tk.LEFT, padx=(0, 4))
+
+        self.exit_button = tk.Button(self.top_frame, text="Exit", command=self.exit_app_direct)
+        self.exit_button.pack(side=tk.LEFT, padx=(0, 4))
 
         self.startup_var = tk.BooleanVar()
         self.startup_check = tk.Checkbutton(self.top_frame, text="Run at Startup", var=self.startup_var, command=self.toggle_startup)
@@ -58,8 +79,39 @@ class AutoPrintGUI(tk.Tk):
         self.watch_dir_label = tk.Label(self.main_frame, text="")
         self.watch_dir_label.pack(fill=tk.X, pady=5)
 
-        self.log_area = scrolledtext.ScrolledText(self.main_frame, wrap=tk.WORD, height=15)
-        self.log_area.pack(fill=tk.BOTH, expand=True)
+        self.log_area = scrolledtext.ScrolledText(self.main_frame, wrap=tk.WORD, height=5, font=("Consolas", 8))
+        self.log_area.pack(fill=tk.BOTH, expand=True, pady=(2, 0))
+
+    def minimize_to_tray(self):
+        if self.is_tray:
+            return
+        self.withdraw()
+        image = None
+        try:
+            image = Image.open(self.icon_path)
+        except Exception:
+            image = None
+        menu = (item('Restore', self.restore_window), item('Exit', self.exit_app))
+        self.tray_icon = pystray.Icon("AutoPrint", image, "AutoPrint", menu)
+        self.is_tray = True
+        threading.Thread(target=self.tray_icon.run, daemon=True).start()
+
+    def restore_window(self, icon, item):
+        self.deiconify()
+        if self.tray_icon:
+            self.tray_icon.stop()
+        self.is_tray = False
+
+    def exit_app(self, icon, item):
+        if self.tray_icon:
+            self.tray_icon.stop()
+        self.is_tray = False
+        self.destroy()
+
+    def on_closing(self):
+        self.minimize_to_tray()
+
+
 
     def update_watch_dir_label(self):
         self.watch_dir_label.config(text=f"Watching: {self.watch_directory_path}")
